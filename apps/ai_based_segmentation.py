@@ -11,6 +11,8 @@ import time
 from utils.learning.metrics import dice_coef, precision, recall
 from utils.io.data import save_results, load_test_images, DataGen
 from models.deeplab import Deeplabv3, relu6, BilinearUpsampling, DepthwiseConv2D
+from utils.postprocessing.hole_filling import fill_holes
+from utils.postprocessing.remove_small_noise import remove_small_areas
 
 input_dim_x = 224
 input_dim_y = 224
@@ -45,6 +47,7 @@ def wound_image_prediction(bytes_data):
             prediction = model.predict(image_batch, verbose=1)
             save_results(prediction, 'rgb', path + 'test/predictions/', test_label_filenames_list)
             return prediction
+
     elif model_selection == "MobilenetV2":
         model = load_model('{}.hdf5'.format(model_selection),
                            custom_objects={'dice_coef': dice_coef,
@@ -69,6 +72,17 @@ def wound_image_prediction(bytes_data):
             prediction = model.predict(image_batch, verbose=1)
             save_results(prediction, 'rgb', path + 'test/predictions/', test_label_filenames_list)
             return prediction
+
+
+def post_process():
+    pred_dir = 'segmentation/test/predictions/1.png'
+    img = cv2.imread(pred_dir)
+    threshold = 50
+    _, threshed = cv2.threshold(img, threshold, 255, type=cv2.THRESH_BINARY)
+    filled = fill_holes(threshed, threshold, 0.1)
+    denoised = remove_small_areas(filled, threshold, 0.05)
+    cv2.imwrite('postprocess/' + '1.png', denoised)
+    return denoised
 
 ###############
 # Main Screen #
@@ -109,6 +123,7 @@ def app():
     col2.write('### Button')
 
     clicked2 = col2.button('Predict Image')
+    clicked3 = col2.button('Denoise Prediction')
 
     if clicked2:
         st.write('### Prediction Image')
@@ -118,3 +133,11 @@ def app():
             time.sleep(1)
             st.success('Prediction Complete!')
             st.image(prediction_result, clamp=True)
+
+    if clicked3:
+        st.write('### Post-process Image')
+        denoise_result = post_process()
+        with st.spinner('⏳Waiting for Post-processing...'):
+            time.sleep(1)
+            st.success('Denoise Complete!')
+            st.image(denoise_result, clamp=True)
