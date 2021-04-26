@@ -13,3 +13,4 @@ keras~=2.3.1
 matplotlib~=3.3.3
 nibabel~=3.2.1
 tensorflow~=1.15.0
+h5py~=2.10.0
