@@ -108,7 +108,7 @@ def app():
         "Select a Deep Learning Model",
         ('UNET', 'MobilenetV2', 'SegNet'),
     )
-    print(model_selection)
+    # print(model_selection)
     # model = load_model('{}.hdf5'.format(model_selection)
     # , custom_objects={'dice_coef': dice_coef, 'precision': precision, 'recall': recall, })
     col1, col2 = st.beta_columns(2)
@@ -125,19 +125,29 @@ def app():
     clicked2 = col2.button('Predict Image')
     clicked3 = col2.button('Denoise Prediction')
 
+    col3, col4 = st.beta_columns(2)
     if clicked2:
-        st.write('### Prediction Image')
-        prediction_result = wound_image_prediction(bytes_data)
+        with col3:
+            st.write('### Prediction Image')
+            prediction_result = wound_image_prediction(bytes_data)
         # prediction_result_resize = prediction_result.resize((256, 256))
-        with st.spinner('⏳Waiting for Prediction...'):
-            time.sleep(1)
-            st.success('Prediction Complete!')
-            st.image(prediction_result, clamp=True)
-
+            with st.spinner('⏳Waiting for Prediction...'):
+                time.sleep(1)
+                st.success('Prediction Complete!')
+                st.image(prediction_result, clamp=True)
     if clicked3:
-        st.write('### Post-process Image')
-        denoise_result = post_process()
-        with st.spinner('⏳Waiting for Post-processing...'):
-            time.sleep(1)
-            st.success('Denoise Complete!')
-            st.image(denoise_result, clamp=True)
+        with col3:
+            st.write('### Prediction Image')
+            prediction_result = wound_image_prediction(bytes_data)
+        # prediction_result_resize = prediction_result.resize((256, 256))
+            with st.spinner('⏳Waiting for Prediction...'):
+                time.sleep(1)
+                st.success('Prediction Complete!')
+                st.image(prediction_result, clamp=True)
+        with col4:
+            st.write('### Post-process Image')
+            denoise_result = post_process()
+            with st.spinner('⏳Waiting for Post-processing...'):
+                time.sleep(1)
+                st.success('Denoise Complete!')
+                st.image(denoise_result, clamp=True)
